@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0D12">
+<title>LUMI · Control Inteligente de Iluminación</title>
+<meta name="description" content="Sistema embebido de control automatizado de iluminación con ESP32: presencia, luz ambiental y ahorro energético.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="dot-bg" aria-hidden="true"></div>
+
+<div class="phone">
+
+  <!-- ===== HEADER ===== -->
+  <header class="app-header">
+    <div class="logo">LUMI</div>
+    <div class="conn-status">
+      <span class="conn-label">Conectado al<br>ESP32</span>
+      <span id="connDot" class="conn-dot conn-dot--on" title="Estado de conexión"></span>
+    </div>
+  </header>
+
+  <!-- ===== MAIN VIEWS ===== -->
+  <main class="views">
+
+    <!-- ---------- INICIO ---------- -->
+    <section id="view-inicio" class="view view--active" aria-labelledby="tab-inicio">
+      <div class="card card--main">
+        <h2 class="card-title">Luz Principal</h2>
+
+        <div class="dial-wrap">
+          <svg id="dial" class="dial" viewBox="0 0 220 220" role="slider"
+               aria-label="Intensidad de la luz principal" aria-valuemin="0" aria-valuemax="100"
+               tabindex="0">
+            <circle class="dial-track" cx="110" cy="110" r="92"></circle>
+            <circle id="dialProgress" class="dial-progress" cx="110" cy="110" r="92"></circle>
+          </svg>
+          <div class="dial-center">
+            <span id="brightnessValue">75%</span>
+          </div>
+        </div>
+
+        <p class="state-line">Estado:
+          <button id="powerToggle" class="state-value" type="button">Encendido</button>
+        </p>
+      </div>
+
+      <div class="segmented segmented--modes" role="tablist" aria-label="Modo de operación">
+        <button id="modeAuto" class="segmented-btn segmented-btn--active" role="tab" aria-selected="true">
+          <span class="icon" aria-hidden="true">⚙️</span> Modo<br>Automático
+        </button>
+        <button id="modeManual" class="segmented-btn" role="tab" aria-selected="false">
+          <span class="icon" aria-hidden="true">✋</span> Modo<br>Manual
+        </button>
+      </div>
+
+      <div class="sensor-row">
+        <div id="pirCard" class="sensor-card sensor-card--active">
+          <span class="icon" aria-hidden="true">🚶</span>
+          <span>Sensor PIR:<br><strong id="pirValue">Ocupado</strong></span>
+        </div>
+        <div class="sensor-card">
+          <span class="icon" aria-hidden="true">💡</span>
+          <span>Sensor LDR:<br><strong id="ldrValue">420 Lux</strong></span>
+        </div>
+      </div>
+
+      <h3 class="section-label">Atajos Rápidos</h3>
+      <div class="shortcut-row">
+        <button id="shortcutDay" class="shortcut-btn" type="button">Modo Día</button>
+        <button id="shortcutNight" class="shortcut-btn" type="button">Modo Noche</button>
+      </div>
+    </section>
+
+    <!-- ---------- REGLAS ---------- -->
+    <section id="view-reglas" class="view" aria-labelledby="tab-reglas">
+
+      <div class="card">
+        <h2 class="card-title card-title--left">Tiempo de Inactividad</h2>
+        <input type="range" id="inactivityRange" class="slider" min="1" max="30" step="1" value="5">
+        <div class="slider-labels">
+          <span class="slider-labels__min"><span id="inactivityValue">5</span> min</span>
+          <span class="slider-labels__max">30 min</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <h2 class="card-title card-title--left">Modo Noche</h2>
+          <label class="switch">
+            <input type="checkbox" id="nightModeToggle" checked>
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div id="nightModeBody">
+          <p class="field-label">Intensidad de Noche</p>
+          <div class="slider-with-icon">
+            <span aria-hidden="true">☀️</span>
+            <input type="range" id="nightIntensityRange" class="slider" min="0" max="100" step="1" value="60">
+          </div>
+
+          <div class="time-row">
+            <div class="time-field">
+              <label for="nightStart">Hora de Inicio:</label>
+              <div class="time-input"><span aria-hidden="true">🕒</span>
+                <input type="time" id="nightStart" value="22:00">
+              </div>
+            </div>
+            <div class="time-field">
+              <label for="nightEnd">Hora de Fin:</label>
+              <div class="time-input"><span aria-hidden="true">🕒</span>
+                <input type="time" id="nightEnd" value="06:00">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <h2 class="card-title card-title--left">Modo Seguridad</h2>
+          <label class="switch">
+            <input type="checkbox" id="securityModeToggle" checked>
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div id="securityModeBody">
+          <hr class="divider">
+          <p class="field-label">Horario:</p>
+          <div class="time-row time-row--display">
+            <input type="time" id="securityStart" value="23:00">
+            <span>–</span>
+            <input type="time" id="securityEnd" value="05:00">
+          </div>
+
+          <button id="alertBanner" class="alert-banner" type="button">
+            <span class="icon" aria-hidden="true">🔔</span>
+            <span>
+              <strong>Historial de Alertas</strong><br>
+              <span id="lastAlert">Última detección: 03:15 AM</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- ESTADÍSTICAS ---------- -->
+    <section id="view-estadisticas" class="view" aria-labelledby="tab-estadisticas">
+      <div class="card">
+        <div class="segmented segmented--range" role="tablist" aria-label="Rango de tiempo">
+          <button class="segmented-btn range-btn range-btn--active" data-range="dia" role="tab" aria-selected="true">Día</button>
+          <button class="segmented-btn range-btn" data-range="semana" role="tab" aria-selected="false">Semana</button>
+          <button class="segmented-btn range-btn" data-range="mes" role="tab" aria-selected="false">Mes</button>
+        </div>
+
+        <div class="chart-wrap">
+          <span class="chart-unit">kWh</span>
+          <svg id="chart" class="chart" viewBox="0 0 340 300" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card stat-card--eco">
+          <p class="stat-title">Ahorro Total:</p>
+          <p class="stat-value stat-value--eco"><span class="eco-badge">ECO</span> <span id="savingsValue">38</span>%</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-title">Consumo<br>Semanal:</p>
+          <p class="stat-value"><span id="weeklyValue">4.2</span> kWh</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button id="tab-inicio" class="nav-btn nav-btn--active" data-view="view-inicio">
+      <span class="nav-icon" aria-hidden="true">🏠</span>
+      <span>Inicio</span>
+    </button>
+    <button id="tab-reglas" class="nav-btn" data-view="view-reglas">
+      <span class="nav-icon" aria-hidden="true">⚙️</span>
+      <span>Reglas</span>
+    </button>
+    <button id="tab-estadisticas" class="nav-btn" data-view="view-estadisticas">
+      <span class="nav-icon" aria-hidden="true">📶</span>
+      <span>Estadísticas</span>
+    </button>
+  </nav>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

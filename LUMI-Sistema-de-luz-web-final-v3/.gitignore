@@ -1,0 +1,20 @@
+# Dependencias de Node.js
+node_modules/
+
+# Variables de entorno y contraseñas
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Configuración personal de VS Code
+.vscode/
+
+# ZIP de respaldo
+*.zip

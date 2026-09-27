@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="LUMI - Sistema Inteligente de Iluminación">
+  <title>LUMI — Sistema Inteligente de Iluminación</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+
+  <!-- ==================== AUTH ==================== -->
+  <section id="authScreen" class="auth-screen" aria-label="Acceso a LUMI">
+    <div class="auth-card glass">
+      <div class="brand brand-auth">
+        <div class="brand-mark"><span>💡</span></div>
+        <div>
+          <div class="brand-name">LUMI</div>
+          <div class="brand-sub">Sistema Inteligente de Iluminación</div>
+        </div>
+      </div>
+      <div class="auth-copy">
+        <span class="eyebrow">HOGAR INTELIGENTE</span>
+        <h1>Todo el control de tu iluminación en un solo lugar.</h1>
+        <p>Administra habitaciones, modos, horarios, estadísticas y el estado del ESP32 desde una interfaz moderna.</p>
+      </div>
+      <form id="loginForm" class="auth-form">
+        <label>
+          Correo electrónico
+          <input id="loginEmail" type="email" autocomplete="email" placeholder="tu@correo.com" value="demo@lumi.local" required>
+        </label>
+        <label>
+          Contraseña
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" value="lumi123" required>
+        </label>
+        <button type="submit" class="btn btn-primary btn-lg">Entrar a LUMI <span>→</span></button>
+        <div class="auth-divider"><span>o</span></div>
+        <button type="button" id="googleDemoBtn" class="btn btn-google btn-lg"><span class="google-g">G</span> Continuar con Google</button>
+      </form>
+      <div class="demo-note"><span>●</span> Modo demostración: los datos se guardan en este navegador.</div>
+    </div>
+  </section>
+
+  <!-- ==================== APP ==================== -->
+  <main id="appShell" class="app-shell hidden">
+    <aside class="sidebar glass">
+      <div class="sidebar-top">
+        <div class="brand">
+          <div class="brand-mark"><span>💡</span></div>
+          <div>
+            <div class="brand-name">LUMI</div>
+            <div class="brand-sub">Sistema Inteligente<br>de Iluminación</div>
+          </div>
+        </div>
+      </div>
+
+      <nav id="mainNav" class="main-nav" aria-label="Navegación principal">
+        <button class="nav-item active" data-view="inicio"><span class="nav-icon">⌂</span><span>Inicio</span></button>
+        <button class="nav-item" data-view="habitaciones"><span class="nav-icon">⌂</span><span>Habitaciones</span></button>
+        <button class="nav-item" data-view="modos"><span class="nav-icon">◉</span><span>Modos</span></button>
+        <button class="nav-item" data-view="programacion"><span class="nav-icon">◷</span><span>Programación</span></button>
+        <button class="nav-item" data-view="estadisticas"><span class="nav-icon">▥</span><span>Estadísticas</span></button>
+        <button class="nav-item" data-view="historial"><span class="nav-icon">◴</span><span>Historial</span></button>
+        <button class="nav-item" data-view="configuracion"><span class="nav-icon">⚙</span><span>Configuración</span></button>
+      </nav>
+
+      <div class="sidebar-banner">
+        <div class="banner-light">💡</div>
+        <div>
+          <strong>Iluminación<br>inteligente</strong>
+          <span>en tus manos</span>
+        </div>
+      </div>
+
+      <button id="logoutBtn" class="logout-btn">↪ Cerrar sesión</button>
+    </aside>
+
+    <section class="content-shell">
+      <header class="topbar">
+        <button id="mobileMenuBtn" class="icon-btn mobile-menu" aria-label="Abrir menú">☰</button>
+        <button id="homeSelector" class="home-selector glass-soft" title="Cambiar hogar">
+          <span class="home-selector-icon">⌂</span>
+          <span>
+            <small>HOGAR</small>
+            <strong>Hogar Inteligente</strong>
+          </span>
+          <span class="chevron">⌄</span>
+        </button>
+
+        <div class="topbar-spacer"></div>
+
+        <button id="deviceStatusBtn" class="connection-pill" title="Ver estado del ESP32">
+          <span class="status-dot"></span>
+          <span>
+            <strong id="topConnectionText">ESP32 Conectado</strong>
+            <small id="topConnectionIp">192.168.1.85</small>
+          </span>
+          <span class="wifi-icon">⌁</span>
+        </button>
+        <div class="top-date"><small id="currentDate">24 Sep 2026</small><strong id="currentTime">19:42</strong></div>
+        <button id="notificationBtn" class="icon-btn has-dot" aria-label="Notificaciones">♢</button>
+        <button id="profileBtn" class="profile-btn" aria-label="Perfil"><span id="profileInitial">U</span><small>⌄</small></button>
+      </header>
+
+      <div class="views">
+        <!-- ==================== INICIO ==================== -->
+        <section id="view-inicio" class="view active-view">
+          <div class="view-header">
+            <div>
+              <span class="eyebrow">PANEL PRINCIPAL</span>
+              <h1>Control de iluminación</h1>
+              <p>Gestiona tu hogar y consulta el estado del sistema en tiempo real.</p>
+            </div>
+            <div id="globalStateChip" class="chip chip-online"><span class="status-dot"></span> Sistema en línea</div>
+          </div>
+
+          <div class="grid-main">
+            <article class="card hero-control">
+              <div class="card-header">
+                <div><span class="mini-label">LUZ PRINCIPAL</span><h2>Control principal</h2></div>
+                <div class="live-label"><span class="status-dot"></span><span id="mainOnlineText">En línea</span></div>
+              </div>
+              <div class="hero-control-grid">
+                <div class="bulb-panel">
+                  <div id="bulbVisual" class="bulb-visual on"><span class="bulb-core">💡</span></div>
+                  <div class="bulb-caption"><span>Estado de la luz</span><strong id="mainStateText">Encendida</strong></div>
+                </div>
+                <div class="control-stack">
+                  <div class="main-toggle-row">
+                    <div><span>Estado de la luz</span><strong id="mainPowerText">Encendida</strong></div>
+                    <button id="mainPowerToggle" class="toggle on" role="switch" aria-checked="true"><span></span></button>
+                  </div>
+                  <div class="divider"></div>
+                  <div class="intensity-row"><span>Intensidad</span><strong id="mainBrightnessText">75%</strong></div>
+                  <input id="mainBrightness" class="range" type="range" min="0" max="100" value="75" step="5">
+                  <div class="quick-values" id="mainQuickValues">
+                    <button data-value="0">0%</button><button data-value="25">25%</button><button data-value="50">50%</button><button data-value="75" class="selected">75%</button><button data-value="100">100%</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card esp-card">
+              <div class="card-header">
+                <div><span class="mini-label">DISPOSITIVO</span><h2>Conexión ESP32</h2></div>
+                <button id="espOptionsBtn" class="more-btn">•••</button>
+              </div>
+              <div id="espConnectionBanner" class="esp-banner online">
+                <span class="esp-big-dot"></span>
+                <div><strong id="espStatusText">Conectado</strong><span id="espIpText">192.168.1.85</span></div>
+                <span class="wifi-round">⌁</span>
+              </div>
+              <div class="metric-grid three">
+                <div class="metric"><span>Latencia</span><strong id="latencyText">28 ms</strong></div>
+                <div class="metric"><span>RSSI</span><strong id="rssiText">−62 dBm</strong></div>
+                <div class="metric"><span>Uptime</span><strong id="uptimeText">3 h 12 min</strong></div>
+              </div>
+              <div class="sync-row"><span class="check-mark">✓</span><span>Última sincronización</span><strong id="syncTimeText">19:42:18</strong></div>
+              <div class="button-row">
+                <button id="testConnectionBtn" class="btn btn-outline">⟳ Probar conexión</button>
+                <button id="disconnectBtn" class="icon-square">⚙</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="grid-secondary">
+            <article class="card room-card-section">
+              <div class="card-header"><div><span class="mini-label">CONTROL POR ZONA</span><h2>Habitaciones / Zonas</h2></div><button class="btn btn-ghost" data-view-target="habitaciones">＋ Agregar zona</button></div>
+              <div id="roomGrid" class="room-grid"></div>
+            </article>
+
+            <article class="card modes-card-section">
+              <div class="card-header"><div><span class="mini-label">ESCENARIOS</span><h2>Modos inteligentes</h2></div><button class="more-btn" data-view-target="modos">•••</button></div>
+              <div id="modeGridCompact" class="mode-grid compact"></div>
+            </article>
+          </div>
+
+          <div class="grid-bottom">
+            <article class="card schedules-card-section">
+              <div class="card-header"><div><span class="mini-label">AUTOMATIZACIÓN</span><h2>Programación de horarios</h2></div><label class="switch-label"><input id="scheduleMasterToggle" type="checkbox" checked><span class="toggle on"></span></label></div>
+              <div id="schedulePreview" class="schedule-preview"></div>
+              <button class="btn btn-outline full" data-view-target="programacion">＋ Agregar horario</button>
+            </article>
+
+            <article class="card stats-card-section">
+              <div class="card-header"><div><span class="mini-label">CONSUMO</span><h2>Estadísticas de uso</h2></div><select id="statsRangeSelect" class="select"><option value="week">Esta semana</option><option value="month">Este mes</option><option value="today">Hoy</option></select></div>
+              <div class="chart-tabs" id="chartTabs"><button class="active" data-tab="consumo">Consumo</button><button data-tab="horas">Horas de uso</button><button data-tab="comparativa">Comparativa</button></div>
+              <div id="miniChart" class="mini-chart"></div>
+              <div class="stat-footer"><div><strong id="totalKwhText">2.4 kWh</strong><span>Consumo total</span></div><div><strong id="savingText">−18%</strong><span>Ahorro vs. anterior</span></div><div><strong id="avgHoursText">5 h 32 min</strong><span>Promedio diario</span></div></div>
+            </article>
+
+            <article class="card history-card-section">
+              <div class="card-header"><div><span class="mini-label">ACTIVIDAD</span><h2>Historial de actividad</h2></div><button class="btn btn-ghost" data-view-target="historial">Ver todo</button></div>
+              <div id="historyPreview" class="history-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ==================== HABITACIONES ==================== -->
+        <section id="view-habitaciones" class="view">
+          <div class="view-header"><div><span class="eyebrow">ZONAS</span><h1>Habitaciones y zonas</h1><p>Controla cada espacio de tu hogar de manera independiente.</p></div><button id="addRoomBtn" class="btn btn-primary">＋ Agregar zona</button></div>
+          <div id="roomPageGrid" class="room-page-grid"></div>
+        </section>
+
+        <!-- ==================== MODOS ==================== -->
+        <section id="view-modos" class="view">
+          <div class="view-header"><div><span class="eyebrow">ESCENARIOS</span><h1>Modos inteligentes</h1><p>Selecciona un ambiente y LUMI ajustará la iluminación.</p></div></div>
+          <div id="modePageGrid" class="mode-page-grid"></div>
+          <article class="card mode-detail" id="modeDetailCard"></article>
+        </section>
+
+        <!-- ==================== PROGRAMACIÓN ==================== -->
+        <section id="view-programacion" class="view">
+          <div class="view-header"><div><span class="eyebrow">AUTOMATIZACIÓN</span><h1>Programación</h1><p>Define cuándo quieres que tus luces se enciendan y apaguen.</p></div><button id="addScheduleBtn" class="btn btn-primary">＋ Nuevo horario</button></div>
+          <div class="program-grid"><article class="card"><div class="card-header"><div><span class="mini-label">HORARIOS</span><h2>Reglas activas</h2></div><label class="switch-label"><input id="scheduleMasterToggle2" type="checkbox" checked><span class="toggle on"></span></label></div><div id="scheduleFullList" class="schedule-full-list"></div></article><article class="card"><div class="card-header"><div><span class="mini-label">AYUDA</span><h2>Cómo funciona</h2></div></div><div class="help-grid"><div><strong>01</strong><span>Elige una habitación.</span></div><div><strong>02</strong><span>Define encendido o apagado.</span></div><div><strong>03</strong><span>Selecciona hora y días.</span></div><div><strong>04</strong><span>LUMI ejecutará la regla.</span></div></div></article></div>
+        </section>
+
+        <!-- ==================== ESTADÍSTICAS ==================== -->
+        <section id="view-estadisticas" class="view">
+          <div class="view-header"><div><span class="eyebrow">ANALÍTICA</span><h1>Estadísticas de uso</h1><p>Consulta consumo, horas de uso y ahorro energético.</p></div><select id="statsRangePage" class="select"><option value="week">Esta semana</option><option value="month">Este mes</option><option value="today">Hoy</option></select></div>
+          <div class="metric-grid stats-summary"><div class="metric-big"><span>Consumo total</span><strong id="pageKwh">2.4 kWh</strong><small>Últimos 7 días</small></div><div class="metric-big"><span>Ahorro</span><strong id="pageSaving">18%</strong><small>vs. periodo anterior</small></div><div class="metric-big"><span>Horas de uso</span><strong id="pageHours">38 h 44 min</strong><small>Acumuladas</small></div><div class="metric-big"><span>Promedio diario</span><strong id="pageAvg">5 h 32 min</strong><small>Por hogar</small></div></div>
+          <article class="card large-chart-card"><div class="card-header"><div><span class="mini-label">EVOLUCIÓN</span><h2 id="largeChartTitle">Consumo energético</h2></div><div class="chart-tabs" id="pageChartTabs"><button class="active" data-tab="consumo">Consumo</button><button data-tab="horas">Horas de uso</button><button data-tab="comparativa">Comparativa</button></div></div><div id="largeChart" class="large-chart"></div></article>
+        </section>
+
+        <!-- ==================== HISTORIAL ==================== -->
+        <section id="view-historial" class="view">
+          <div class="view-header"><div><span class="eyebrow">REGISTRO</span><h1>Historial de actividad</h1><p>Consulta los cambios y eventos del sistema.</p></div><button id="clearHistoryBtn" class="btn btn-outline danger">Limpiar historial</button></div>
+          <article class="card"><div id="fullHistoryList" class="history-full-list"></div></article>
+        </section>
+
+        <!-- ==================== CONFIG ==================== -->
+        <section id="view-configuracion" class="view">
+          <div class="view-header"><div><span class="eyebrow">SISTEMA</span><h1>Configuración</h1><p>Personaliza tu hogar, usuario y conexión.</p></div></div>
+          <div class="settings-grid">
+            <article class="card settings-card"><div class="card-header"><div><span class="mini-label">PERFIL</span><h2>Cuenta LUMI</h2></div></div><label>Nombre<input id="settingsName" type="text"></label><label>Correo<input id="settingsEmail" type="email"></label><button id="saveProfileBtn" class="btn btn-primary">Guardar cambios</button></article>
+            <article class="card settings-card"><div class="card-header"><div><span class="mini-label">ESP32</span><h2>Dispositivo</h2></div><span class="chip chip-online"><span class="status-dot"></span> Demo</span></div><label>Nombre del dispositivo<input id="deviceNameInput" type="text"></label><label>IP local<input id="deviceIpInput" type="text"></label><label class="check-setting"><input id="simulateConnectionToggle" type="checkbox"><span>Simular conexión del ESP32</span></label><button id="saveDeviceBtn" class="btn btn-outline">Guardar dispositivo</button></article>
+            <article class="card settings-card"><div class="card-header"><div><span class="mini-label">PREFERENCIAS</span><h2>Interfaz</h2></div></div><label class="check-setting"><input id="notifyToggle" type="checkbox" checked><span>Mostrar notificaciones</span></label><label class="check-setting"><input id="animationsToggle" type="checkbox" checked><span>Animaciones</span></label><button id="resetDemoBtn" class="btn btn-outline danger">Restablecer demo</button></article>
+            <article class="card settings-card"><div class="card-header"><div><span class="mini-label">INTEGRACIÓN FUTURA</span><h2>API / Base de datos</h2></div></div><p class="settings-note">La interfaz ya separa la capa de datos de la interfaz. En la siguiente etapa puedes sustituir el almacenamiento local por Node.js + Express + MySQL o Supabase/Firebase.</p><div class="code-note">Frontend → API → Base de datos → ESP32</div></article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile nav drawer -->
+  <div id="mobileOverlay" class="mobile-overlay hidden"></div>
+
+  <!-- Modal -->
+  <div id="modalRoot" class="modal-root hidden"></div>
+
+  <script src="script.js?v=v3-final"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

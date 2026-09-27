@@ -1,0 +1,10 @@
+{
+  "name": "LUMI — Sistema Inteligente de Iluminación",
+  "short_name": "LUMI",
+  "start_url": "lumi_control_inteligente_esp32.html",
+  "display": "standalone",
+  "background_color": "#060a13",
+  "theme_color": "#0b1020",
+  "lang": "es-MX",
+  "icons": []
+}
